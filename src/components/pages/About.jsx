@@ -1,6 +1,7 @@
 import React from "react";
 import PageBanner from "./PageBanner";
 import { motion } from "framer-motion";
+import "../../output.css";
 
 const About = () => {
   // Animation variants for text and cards
