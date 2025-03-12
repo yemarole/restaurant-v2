@@ -1,12 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-// Import Swiper styles and modules
-import { Swiper, SwiperSlide } from "swiper/react";
-import "swiper/css";
-import "swiper/css/pagination";
-import "swiper/css/navigation";
-import { Pagination, Navigation } from "swiper/modules";
+import { motion, AnimatePresence } from "framer-motion";
 
 const HomePage = () => {
   // Animation variants
@@ -72,6 +66,71 @@ const HomePage = () => {
     },
   ];
 
+  // State for carousel
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [direction, setDirection] = useState(1); // 1 for right, -1 for left
+  const [windowWidth, setWindowWidth] = useState(
+    typeof window !== "undefined" ? window.innerWidth : 0
+  );
+  const [slidesToShow, setSlidesToShow] = useState(1);
+
+  // Determine number of visible slides based on screen width
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    // Still calculate slidesToShow for responsive design, but we'll use it differently
+    if (windowWidth >= 1024) {
+      setSlidesToShow(3);
+    } else if (windowWidth >= 768) {
+      setSlidesToShow(2);
+    } else {
+      setSlidesToShow(1);
+    }
+  }, [windowWidth]);
+
+  const goToNextSlide = () => {
+    setDirection(1);
+    setCurrentSlide((prev) => (prev + 1) % testimonials.length);
+  };
+
+  const goToPrevSlide = () => {
+    setDirection(-1);
+    setCurrentSlide(
+      (prev) => (prev - 1 + testimonials.length) % testimonials.length
+    );
+  };
+
+  // Animation variants for carousel sliding
+  const slideVariants = {
+    enter: (direction) => ({
+      x: direction > 0 ? 500 : -500,
+      opacity: 0,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+      transition: {
+        duration: 0.5,
+        ease: "easeInOut",
+      },
+    },
+    exit: (direction) => ({
+      x: direction > 0 ? -500 : 500,
+      opacity: 0,
+      transition: {
+        duration: 0.5,
+        ease: "easeInOut",
+      },
+    }),
+  };
+
   return (
     <>
       {/* Hero Section */}
@@ -96,7 +155,7 @@ const HomePage = () => {
             Welcome to mycoBrew
           </motion.h1>
           <motion.p
-            className="text-xl md:text-2xl text-[#F0F4F8] mb-8 max-w-2xl mx-auto"
+            className="text-xl md:text-2xl text-[#F7FAFC] mb-8 max-w-2xl mx-auto"
             variants={textVariants}
           >
             Discover the finest mushroom-coffee and mushroom-matcha blends
@@ -113,16 +172,20 @@ const HomePage = () => {
         </motion.div>
       </div>
 
-      {/* Testimonial Carousel Section */}
+      {/* Testimonial Carousel Section - With Framer Motion Animation */}
       <div className="bg-[#F7FAFC] py-16">
         <div className="container mx-auto px-4 relative">
           <h2 className="text-4xl font-bold text-center mb-12 text-[#6B4423] font-serif">
             What Our Customers Say
           </h2>
 
-          {/* Custom navigation buttons outside the Swiper container */}
-          <div className="testimonial-navigation absolute top-1/2 w-full z-10 flex justify-between items-center pointer-events-none">
-            <div className="swiper-button-prev-custom -left-5 md:-left-12 absolute cursor-pointer w-10 h-10 rounded-full bg-[#6B4423] text-white flex items-center justify-center shadow-md pointer-events-auto">
+          {/* Navigation buttons */}
+          <div className="absolute top-1/2 w-full z-10 flex justify-between items-center pointer-events-none">
+            <button
+              onClick={goToPrevSlide}
+              className="transform -translate-y-6 -left-5 md:-left-12 absolute cursor-pointer w-10 h-10 rounded-full bg-[#6B4423] text-white flex items-center justify-center shadow-md pointer-events-auto hover:bg-[#8B5E3C] transition-colors duration-300"
+              aria-label="Previous testimonial"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
@@ -135,8 +198,12 @@ const HomePage = () => {
                   clipRule="evenodd"
                 />
               </svg>
-            </div>
-            <div className="swiper-button-next-custom -right-5 md:-right-12 absolute cursor-pointer w-10 h-10 rounded-full bg-[#6B4423] text-white flex items-center justify-center shadow-md pointer-events-auto">
+            </button>
+            <button
+              onClick={goToNextSlide}
+              className="transform -translate-y-6 -right-5 md:-right-12 absolute cursor-pointer w-10 h-10 rounded-full bg-[#6B4423] text-white flex items-center justify-center shadow-md pointer-events-auto hover:bg-[#8B5E3C] transition-colors duration-300"
+              aria-label="Next testimonial"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
@@ -149,72 +216,79 @@ const HomePage = () => {
                   clipRule="evenodd"
                 />
               </svg>
-            </div>
+            </button>
           </div>
 
-          <Swiper
-            pagination={{ clickable: true, dynamicBullets: true }}
-            navigation={{
-              prevEl: ".swiper-button-prev-custom",
-              nextEl: ".swiper-button-next-custom",
-            }}
-            modules={[Pagination, Navigation]}
-            spaceBetween={30}
-            slidesPerView={1}
-            breakpoints={{
-              768: {
-                slidesPerView: 2,
-              },
-              1024: {
-                slidesPerView: 3,
-              },
-            }}
-            className="testimonial-swiper py-8" // Added padding for pagination bullets
-          >
-            {testimonials.map((testimonial) => (
-              <SwiperSlide key={testimonial.id}>
-                <div className="bg-white rounded-lg shadow-lg p-8 h-64 md:h-72 flex flex-col justify-between transform transition-transform duration-300 hover:shadow-xl">
-                  <div>
-                    <p className="text-[#2D3748] mb-4 italic text-lg leading-relaxed line-clamp-4">
-                      "{testimonial.quote}"
-                    </p>
-                  </div>
-                  <div className="text-left mt-auto">
-                    <h4 className="font-bold text-[#6B4423] text-xl">
-                      {testimonial.name}
-                    </h4>
-                    <p className="text-sm text-[#718096]">{testimonial.role}</p>
-                  </div>
+          {/* Testimonial cards with animation - now displaying only one at a time but styled based on screen size */}
+          <div className="overflow-hidden flex justify-center">
+            <AnimatePresence initial={false} custom={direction} mode="wait">
+              <motion.div
+                key={currentSlide}
+                custom={direction}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                className="flex justify-center w-full"
+              >
+                <div
+                  className={`${
+                    slidesToShow === 3
+                      ? "w-1/3"
+                      : slidesToShow === 2
+                      ? "w-1/2"
+                      : "w-full max-w-lg"
+                  } px-4`}
+                >
+                  <motion.div
+                    className="bg-white rounded-lg shadow-lg p-8 h-64 md:h-72 flex flex-col justify-between"
+                    whileHover={{
+                      y: -8,
+                      boxShadow:
+                        "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+                      transition: { duration: 0.3 },
+                    }}
+                  >
+                    <div>
+                      <p className="text-[#2D3748] mb-4 italic text-lg leading-relaxed line-clamp-4">
+                        "{testimonials[currentSlide].quote}"
+                      </p>
+                    </div>
+                    <div className="text-left mt-auto">
+                      <h4 className="font-bold text-[#6B4423] text-xl">
+                        {testimonials[currentSlide].name}
+                      </h4>
+                      <p className="text-sm text-[#718096]">
+                        {testimonials[currentSlide].role}
+                      </p>
+                    </div>
+                  </motion.div>
                 </div>
-              </SwiperSlide>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Pagination dots */}
+          <div className="flex justify-center mt-8 space-x-2">
+            {testimonials.map((_, index) => (
+              <motion.button
+                key={index}
+                onClick={() => {
+                  setDirection(index > currentSlide ? 1 : -1);
+                  setCurrentSlide(index);
+                }}
+                className={`w-3 h-3 rounded-full transition-colors duration-300 ${
+                  index === currentSlide
+                    ? "bg-[#6B4423]"
+                    : "bg-[#6B4423] opacity-30 hover:opacity-50"
+                }`}
+                whileHover={{ scale: 1.5 }}
+                aria-label={`Go to testimonial ${index + 1}`}
+              />
             ))}
-          </Swiper>
+          </div>
         </div>
       </div>
-
-      <style jsx>{`
-        .testimonial-swiper .swiper-pagination {
-          position: relative;
-          bottom: -5px !important;
-          margin-top: 20px;
-        }
-
-        .testimonial-swiper .swiper-pagination-bullet {
-          background: #6b4423;
-          opacity: 0.5;
-        }
-
-        .testimonial-swiper .swiper-pagination-bullet-active {
-          opacity: 1;
-          background: #6b4423;
-        }
-
-        /* Hide default Swiper navigation buttons */
-        .testimonial-swiper .swiper-button-next,
-        .testimonial-swiper .swiper-button-prev {
-          display: none;
-        }
-      `}</style>
     </>
   );
 };
