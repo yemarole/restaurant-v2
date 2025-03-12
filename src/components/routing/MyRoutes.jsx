@@ -5,6 +5,7 @@ import {
   Route,
   useLocation,
 } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
 import HomePage from "../pages/HomePage";
 import DishDetails from "../pages/DishDetails";
 import Order from "../pages/Order";
@@ -13,6 +14,8 @@ import Navbar from "../pages/NavBar";
 import About from "../pages/About";
 import Footer from "../pages/Footer";
 import Contact from "../pages/Contact";
+import PageLoadingIndicator from "../PageLoadingIndicator";
+import { EnhancedPageTransition } from "../EnhancedPageTransitions";
 
 // Component to scroll to the top on route change
 const ScrollToTop = () => {
@@ -27,6 +30,7 @@ const ScrollToTop = () => {
 
 const MyRoutes = () => {
   const [order, setOrder] = useState([]);
+  const location = useLocation();
 
   // Add an item to the order
   const addToOrder = (dish) => {
@@ -74,44 +78,89 @@ const MyRoutes = () => {
   };
 
   return (
-    <Router>
-      {/* Flex container to ensure footer sticks to the bottom */}
-      <div className="flex flex-col min-h-screen">
-        {/* Scroll to the top on route change */}
-        <ScrollToTop />
+    <>
+      {/* Scroll to the top on route change */}
+      <ScrollToTop />
 
-        {/* Navbar */}
-        <Navbar order={order} />
+      {/* Navbar */}
+      <Navbar order={order} />
+      <PageLoadingIndicator />
 
-        {/* Main content area */}
-        <div className="flex-grow">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/menu" element={<Menu addToOrder={addToOrder} />} />
+      {/* Main content area with AnimatePresence for exit animations */}
+      <div className="flex-grow">
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+            <Route
+              path="/"
+              element={
+                <EnhancedPageTransition transitionType="fade">
+                  <HomePage />
+                </EnhancedPageTransition>
+              }
+            />
+            <Route
+              path="/menu"
+              element={
+                <EnhancedPageTransition transitionType="scale">
+                  <Menu addToOrder={addToOrder} />
+                </EnhancedPageTransition>
+              }
+            />
             <Route
               path="/dish/:id"
-              element={<DishDetails addToOrder={addToOrder} />}
+              element={
+                <EnhancedPageTransition transitionType="scale">
+                  <DishDetails addToOrder={addToOrder} />
+                </EnhancedPageTransition>
+              }
             />
             <Route
               path="/order"
               element={
-                <Order
-                  order={order}
-                  removeFromOrder={removeFromOrder}
-                  updateQuantity={updateQuantity}
-                />
+                <EnhancedPageTransition transitionType="slide">
+                  <Order
+                    order={order}
+                    removeFromOrder={removeFromOrder}
+                    updateQuantity={updateQuantity}
+                  />
+                </EnhancedPageTransition>
               }
             />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
+            <Route
+              path="/about"
+              element={
+                <EnhancedPageTransition transitionType="reveal">
+                  <About />
+                </EnhancedPageTransition>
+              }
+            />
+            <Route
+              path="/contact"
+              element={
+                <EnhancedPageTransition transitionType="slide">
+                  <Contact />
+                </EnhancedPageTransition>
+              }
+            />
           </Routes>
-        </div>
+        </AnimatePresence>
+      </div>
 
-        {/* Footer */}
-        <Footer />
+      {/* Footer */}
+      <Footer />
+    </>
+  );
+};
+
+// Wrapper component to provide Router context
+const AppRouter = () => {
+  return (
+    <Router>
+      <div className="flex flex-col min-h-screen">
+        <MyRoutes />
       </div>
     </Router>
   );
 };
 
-export default MyRoutes;
+export default AppRouter;
