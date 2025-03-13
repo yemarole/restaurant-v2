@@ -87,9 +87,9 @@ const HomePage = () => {
   useEffect(() => {
     // Still calculate slidesToShow for responsive design, but we'll use it differently
     if (windowWidth >= 1024) {
-      setSlidesToShow(3);
+      setSlidesToShow(1);
     } else if (windowWidth >= 768) {
-      setSlidesToShow(2);
+      setSlidesToShow(1);
     } else {
       setSlidesToShow(1);
     }
@@ -180,10 +180,10 @@ const HomePage = () => {
           </h2>
 
           {/* Navigation buttons */}
-          <div className="absolute top-1/2 w-full z-10 flex justify-between items-center pointer-events-none">
+          <div className="absolute top-1/2 left-0 right-0 z-10 flex justify-between items-center pointer-events-none">
             <button
               onClick={goToPrevSlide}
-              className="transform -translate-y-6 -left-5 md:-left-12 absolute cursor-pointer w-10 h-10 rounded-full bg-[#6B4423] text-white flex items-center justify-center shadow-md pointer-events-auto hover:bg-[#8B5E3C] transition-colors duration-300"
+              className="transform -translate-y-1/2 -left-8 md:-left-12 absolute cursor-pointer w-10 h-10 rounded-full bg-[#6B4423] text-white flex items-center justify-center shadow-md pointer-events-auto hover:bg-[#8B5E3C] transition-colors duration-300"
               aria-label="Previous testimonial"
             >
               <svg
@@ -201,7 +201,7 @@ const HomePage = () => {
             </button>
             <button
               onClick={goToNextSlide}
-              className="transform -translate-y-6 -right-5 md:-right-12 absolute cursor-pointer w-10 h-10 rounded-full bg-[#6B4423] text-white flex items-center justify-center shadow-md pointer-events-auto hover:bg-[#8B5E3C] transition-colors duration-300"
+              className="transform -translate-y-1/2 -right-8 md:-right-12 absolute cursor-pointer w-10 h-10 rounded-full bg-[#6B4423] text-white flex items-center justify-center shadow-md pointer-events-auto hover:bg-[#8B5E3C] transition-colors duration-300"
               aria-label="Next testimonial"
             >
               <svg
@@ -237,7 +237,7 @@ const HomePage = () => {
                       ? "w-1/3"
                       : slidesToShow === 2
                       ? "w-1/2"
-                      : "w-full max-w-lg"
+                      : "w-full max-w-3xl"
                   } px-4`}
                 >
                   <motion.div
