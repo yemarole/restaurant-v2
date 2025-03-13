@@ -25,9 +25,8 @@
     "build_react": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "tailwind": "tailwindcss -i ./src/input.css -o ./src/output.css --watch",
-    "build": "tailwindcss -i ./src/input.css -o ./src/output.css --minify && next build"
-
+    "install:tailwind": "npx tailwindcss init",
+    "build:tailwind": "npx tailwindcss -i ./src/input.css -o ./src/output.css --watch"
   },
   "eslintConfig": {
     "extends": [
@@ -46,5 +45,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "next": "^15.2.2"
   }
 }
